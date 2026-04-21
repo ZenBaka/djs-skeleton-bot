@@ -1,7 +1,7 @@
 import { join } from "path";
 import type BotClient from "../structures/BotClient";
 import { Glob } from "bun";
-import { type Button, ButtonShape, hasShape } from "../types";
+import { type Button, ButtonShape, hasShape, isButton } from "../types";
 import logger from "../utilities/Logger";
 import { MessageFlags, type ButtonInteraction } from "discord.js";
 import CooldownManager from "../managers/CooldownManager";
@@ -19,8 +19,8 @@ export async function loadButtons(client: BotClient): Promise<void> {
     try {
       const mod = await import(file);
 
-      if (!hasShape<Button>(mod, ButtonShape)) {
-        logger.warn(`[ButtonHandler] Skipped ${file}, not a valid button`);
+      if (!isButton(mod)) {
+        logger.warn(`[ButtonHandler] Skipped ${file}, invalid types`);
         skipped++;
         continue;
       }

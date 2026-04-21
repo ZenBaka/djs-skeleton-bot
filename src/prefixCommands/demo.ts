@@ -5,11 +5,14 @@ import {
   StringSelectMenuBuilder,
   UserSelectMenuBuilder,
 } from 'discord.js';
-import type { PrefixCommand } from '../types';
+import type { PrefixCommand, PrefixCommandInfo } from '../types';
 
-export const name = "demo";
-export const description = "A demo command showcasing the various components of Discord.";
-export const aliases = ["d", "test", "example"];
+export const info: PrefixCommandInfo = {
+  name: 'demo',
+  description: 'A demo command showcasing the various components of Discord.',
+  category: 'Other',
+  aliases: ['d', 'test', 'example']
+};
 
 // Delete button (author-only via the handler)
 const deleteRow = new ActionRowBuilder<ButtonBuilder>().addComponents(

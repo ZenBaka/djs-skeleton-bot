@@ -1,7 +1,7 @@
 import { join } from "path";
 import type BotClient from "../structures/BotClient";
 import { Glob } from "bun";
-import { hasShape, type ModalSubmit, ModalSubmitShape } from "../types";
+import { hasShape, isModalSubmit, type ModalSubmit, ModalSubmitShape } from "../types";
 import logger from "../utilities/Logger";
 import { MessageFlags, type ModalSubmitInteraction } from "discord.js";
 import CooldownManager from "../managers/CooldownManager";
@@ -19,8 +19,8 @@ export async function loadModals(client: BotClient): Promise<void> {
     try {
       const mod = await import(file);
 
-      if (!hasShape<ModalSubmit>(mod, ModalSubmitShape)) {
-        logger.warn(`[ModalSubmitHandler] Skipped ${file}, not a valid modal submit`);
+      if (!isModalSubmit(mod)) {
+        logger.warn(`[ModalSubmitHandler] Skipped ${file}, invalid types`);
         skipped++;
         continue;
       }

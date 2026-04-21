@@ -1,7 +1,7 @@
 import { join } from "path";
 import type BotClient from "../structures/BotClient";
 import { Glob } from "bun";
-import { hasShape, MenuShape, type SelectMenu } from "../types";
+import { hasShape, isSelectMenu, MenuShape, type SelectMenu } from "../types";
 import logger from "../utilities/Logger";
 import { MessageFlags, type AnySelectMenuInteraction } from "discord.js";
 import CooldownManager from "../managers/CooldownManager";
@@ -24,8 +24,8 @@ export async function loadMenus(client: BotClient): Promise<void> {
     try {
       const mod = await import(file);
 
-      if (!hasShape<SelectMenu>(mod, MenuShape)) {
-        logger.warn(`[SelectMenuHandler] Skipped ${file}, not a valid menu`);
+      if (!isSelectMenu(mod)) {
+        logger.warn(`[SelectMenuHandler] Skipped ${file}, invalid types`);
         skipped++;
         continue;
       }

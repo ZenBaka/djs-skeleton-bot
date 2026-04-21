@@ -1,9 +1,11 @@
 import { SlashCommandBuilder } from "discord.js";
-import type { SlashCommand } from "../types";
+import type { CommandCategory, SlashCommand } from "../types";
 
 export const data = new SlashCommandBuilder()
   .setName('ping')
   .setDescription('Check that the bot is alive and measure latency');
+
+export const category: CommandCategory = 'Information';
 
 export const cooldown = 3;
 

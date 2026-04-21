@@ -1,10 +1,12 @@
 {
   "name": "skeleton-bot",
+  "version": "1.0.0",
   "module": "src/index.ts",
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "bun .",
+    "start": "bun run src/bot.ts",
+    "start:shard": "bun .",
     "typeCheck": "tsc --noEmit",
     "register": "bun run scripts/register-commands.ts",
     "register:guild": "bun run scripts/register-commands.ts --guild",

@@ -4,7 +4,7 @@ import { handleAutocomplete, handleCommand } from "../handlers/SlashCommandHandl
 import { handleButton } from "../handlers/ButtonHandler";
 import { handleMenu } from "../handlers/SelectMenuHandler";
 import { handleModalSubmit } from "../handlers/ModalSubmitHandler";
-import { handleContextMenu } from "../handlers/ContextMenuCommandHandler";
+import { handleContextMenu } from "../handlers/ContextMenuHandler";
 
 export const name = Events.InteractionCreate;
 

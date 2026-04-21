@@ -1,5 +1,5 @@
 import { loadButtons } from "./handlers/ButtonHandler";
-import { loadContextMenus } from "./handlers/ContextMenuCommandHandler";
+import { loadContextMenus } from "./handlers/ContextMenuHandler";
 import { loadEvents } from "./handlers/EventHandler";
 import { loadModals } from "./handlers/ModalSubmitHandler";
 import { loadPrefixCommands } from "./handlers/PrefixCommandHandler";

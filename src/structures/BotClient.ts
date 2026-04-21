@@ -1,4 +1,4 @@
-import { Client, Collection, GatewayIntentBits, Options, type ClientOptions } from "discord.js";
+import { ActivityType, Client, Collection, GatewayIntentBits, Options, type ClientOptions } from "discord.js";
 import type { Button, ContextMenuCommand, ModalSubmit, PrefixCommand, SelectMenu, SlashCommand } from "../types";
 
 export default class BotClient extends Client {
@@ -16,6 +16,11 @@ export default class BotClient extends Client {
    */
   constructor(options?: Partial<ClientOptions>) {
     super({
+      allowedMentions: {
+        parse: ["users"],
+        repliedUser: false,
+      },
+      failIfNotExists: false,
       intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.MessageContent,
@@ -63,6 +68,10 @@ export default class BotClient extends Client {
         UserManager: 1000,
         ThreadManager: 50,
       }),
+      presence: {
+        status: 'idle',
+        activities: [{ name: 'Starting up...', type: ActivityType.Watching }],
+      },
 
       // Sweepers periodically remove old entries from the caches above.
       // `makeCache` limits the hard capped size; sweepers determine how long

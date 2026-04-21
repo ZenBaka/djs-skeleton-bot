@@ -6,13 +6,15 @@ import {
   StringSelectMenuBuilder,
   UserSelectMenuBuilder,
 } from 'discord.js';
-import type { SlashCommand } from '../types';
+import type { CommandCategory, SlashCommand } from '../types';
 
 export const data = new SlashCommandBuilder()
   .setName('demo')
   .setDescription('A demo command to showcase Discord components.');
 
 export const cooldown = 3;
+
+export const category: CommandCategory = 'Other';
 
 // Delete button (author-only via the handler)
 const deleteRow = new ActionRowBuilder<ButtonBuilder>().addComponents(

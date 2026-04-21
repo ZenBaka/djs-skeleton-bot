@@ -3,7 +3,7 @@ import { Glob } from "bun";
 import { MessageFlags } from "discord.js";
 import type { ContextMenuCommandInteraction } from "discord.js";
 import type BotClient from "../structures/BotClient";
-import { BOT_OWNERS, ContextMenuCommandShape, hasShape, type ContextMenuCommand } from "../types";
+import { BOT_OWNERS, ContextMenuCommandShape, hasShape, isContextMenuCommand, type ContextMenuCommand } from "../types";
 import logger from "../utilities/Logger";
 import CooldownManager from "../managers/CooldownManager";
 
@@ -34,8 +34,8 @@ export async function loadContextMenus(client: BotClient): Promise<void> {
     try {
       const mod = await import(file);
 
-      if (!hasShape<ContextMenuCommand>(mod, ContextMenuCommandShape)) {
-        logger.warn(`[ContextMenuHandler] Skipped ${file}, not a valid context menu command`);
+      if (!isContextMenuCommand(mod)) {
+        logger.warn(`[ContextMenuHandler] Skipped ${file}, invalid types`);
         skipped++;
         continue;
       }

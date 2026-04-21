@@ -1,8 +1,17 @@
-import type { PrefixCommand } from "../types";
+import type { PrefixCommand, PrefixCommandHelp, PrefixCommandInfo } from "../types";
 
-export const name = 'echo';
-export const description = 'Echo a message back as the bot.';
-export const aliases = ['msg', 'e'];
+export const info: PrefixCommandInfo = {
+  name: 'echo',
+  description: 'Echo a message back as the bot.',
+  category: 'Owner',
+  aliases: ['msg', 'e']
+}
+
+export const help: PrefixCommandHelp = {
+  args: ['...string'],
+  usage: 'echo This is a test message'
+}
+
 export const cooldown = 3;
 export const isOwnerOnly = true; // prevent mass-mention abuse by default
 

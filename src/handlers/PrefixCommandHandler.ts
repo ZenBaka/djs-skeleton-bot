@@ -1,7 +1,7 @@
 import { join } from "path";
 import type BotClient from "../structures/BotClient";
 import { Glob } from "bun";
-import { BOT_OWNERS, hasShape, type PrefixCommand, PrefixCommandShape } from "../types";
+import { BOT_OWNERS, hasShape, isPrefixCommand, type PrefixCommand, PrefixCommandShape } from "../types";
 import logger from "../utilities/Logger";
 import { Message } from "discord.js";
 import CooldownManager from "../managers/CooldownManager";
@@ -27,29 +27,28 @@ export async function loadPrefixCommands(client: BotClient): Promise<void> {
     try {
       const mod = await import(file);
 
-      if (!hasShape<PrefixCommand>(mod, PrefixCommandShape)) {
-        logger.warn(`[PrefixCommandHandler] Skipped ${file}, not a valid prefix command`);
+      if (!isPrefixCommand(mod)) {
+        logger.warn(`[PrefixCommandHandler] Skipped ${file}, invalid types`);
         skipped++;
         continue;
       }
 
       const command: PrefixCommand = {
-        name: mod.name,
-        description: mod.description,
+        info: mod.info,
         execute: mod.execute,
-        aliases: mod.aliases,
+        help: mod.help,
         cooldown: mod.cooldown,
         isOwnerOnly: mod.isOwnerOnly
       };
 
-      if (client.prefixCommands.has(command.name)) {
-        logger.warn(`[PrefixCommandHandler] Duplicate command name '${command.name}' in ${file}`);
+      if (client.prefixCommands.has(command.info.name)) {
+        logger.warn(`[PrefixCommandHandler] Duplicate command name '${command.info.name}' in ${file}`);
         skipped++;
         continue;
       }
 
-      if (command.aliases) {
-        for (const alias of command.aliases) {
+      if (command.info.aliases) {
+        for (const alias of command.info.aliases) {
           if (client.prefixCommands.has(alias)) {
             logger.warn(`[PrefixCommandHandler] Duplicate command alias '${alias}' in ${file}`);
             aliasesSkipped++;
@@ -61,7 +60,7 @@ export async function loadPrefixCommands(client: BotClient): Promise<void> {
         }
       }
 
-      client.prefixCommands.set(command.name, command);
+      client.prefixCommands.set(command.info.name, command);
       loaded++;
     } catch (error) {
       logger.error(error, `[PrefixCommandHandler] Failed to load file ${file}:`);
@@ -87,6 +86,13 @@ export async function handlePrefixCommand(client: BotClient, message: Message): 
 
   if (!usedPrefix) return;
 
+  if (message.content === mentionPrefix || message.content === mentionPrefixNick) {
+    await message.reply({
+      content: `My prefix is: \`${PREFIX}\`. You can also just mention me with commands too!`
+    });
+    return;
+  }
+
   const args = message.content.slice(usedPrefix.length).trim().split(/ +/);
   const commandName = args.shift()?.toLowerCase();
 
@@ -107,7 +113,7 @@ export async function handlePrefixCommand(client: BotClient, message: Message): 
     return;
   }
 
-  const cooldownKey = CooldownManager.key(command.name, message.author.id);
+  const cooldownKey = CooldownManager.key(command.info.name, message.author.id);
 
   if (command.cooldown) {
     const expiresAt = CooldownManager.check(cooldownKey);

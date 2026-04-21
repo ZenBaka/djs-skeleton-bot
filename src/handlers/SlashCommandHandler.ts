@@ -3,7 +3,7 @@ import type { AutocompleteInteraction, ChatInputCommandInteraction } from "disco
 import { Glob } from "bun";
 import { join } from "path";
 import type BotClient from "../structures/BotClient";
-import { hasShape, SlashCommandShape, type SlashCommand } from "../types";
+import { hasShape, isSlashCommand, SlashCommandShape, type SlashCommand } from "../types";
 import logger from "../utilities/Logger";
 import CooldownManager from "../managers/CooldownManager";
 
@@ -25,20 +25,15 @@ export async function loadCommands(client: BotClient): Promise<void> {
     try {
       const mod = await import(file);
 
-      if (!hasShape<SlashCommand>(mod, SlashCommandShape)) {
-        logger.warn(`[SlashCommandHandler] Skipped ${file}, not a valid command`);
-        skipped++;
-        continue;
-      }
-
-      if (typeof mod.data !== 'object' || typeof mod.execute !== 'function') {
-        logger.warn(`[SlashCommandBuilder] Skipped ${file}, invalid field types`);
+      if (!isSlashCommand(mod)) {
+        logger.warn(`[SlashCommandHandler] Skipped ${file}, invalid types`);
         skipped++;
         continue;
       }
 
       const command: SlashCommand = {
         data: mod.data,
+        category: mod.category,
         execute: mod.execute,
         cooldown: mod.cooldown,
         autocomplete: mod.autocomplete,
