@@ -1,0 +1,62 @@
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  StringSelectMenuBuilder,
+  UserSelectMenuBuilder,
+} from 'discord.js';
+import type { PrefixCommand } from '../types';
+
+export const name = "demo";
+export const description = "A demo command showcasing the various components of Discord.";
+export const aliases = ["d", "test", "example"];
+
+// Delete button (author-only via the handler)
+const deleteRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+  new ButtonBuilder()
+    .setCustomId('delete')
+    .setLabel('Delete')
+    .setStyle(ButtonStyle.Danger),
+);
+
+// Counter button starting at 0
+const counterRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+  new ButtonBuilder()
+    .setCustomId('counter:0')
+    .setLabel('Count: 0')
+    .setStyle(ButtonStyle.Primary),
+);
+
+// Feedback opener
+const feedbackRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+  new ButtonBuilder()
+    .setCustomId('openFeedback')
+    .setLabel('Send Feedback')
+    .setStyle(ButtonStyle.Secondary),
+);
+
+// Color picker string select
+const colorRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+  new StringSelectMenuBuilder()
+    .setCustomId('colorPicker')
+    .setPlaceholder('Pick a color')
+    .addOptions(
+      { label: 'Red', value: 'red' },
+      { label: 'Green', value: 'green' },
+      { label: 'Blue', value: 'blue' },
+    ),
+);
+
+// User picker
+const userRow = new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(
+  new UserSelectMenuBuilder()
+    .setCustomId('pickUser')
+    .setPlaceholder('Pick a user'),
+);
+
+export const execute: PrefixCommand['execute'] = async (_client, message, ..._args) => {
+  await message.reply({
+    content: 'Demo components:',
+    components: [deleteRow, counterRow, feedbackRow, colorRow, userRow]
+  });
+}

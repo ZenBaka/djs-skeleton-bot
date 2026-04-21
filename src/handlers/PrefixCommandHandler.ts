@@ -1,0 +1,140 @@
+import { join } from "path";
+import type BotClient from "../structures/BotClient";
+import { Glob } from "bun";
+import { BOT_OWNERS, hasShape, type PrefixCommand, PrefixCommandShape } from "../types";
+import logger from "../utilities/Logger";
+import { Message } from "discord.js";
+import CooldownManager from "../managers/CooldownManager";
+
+const COMMANDS_DIR = join(import.meta.dir, '..', 'prefixCommands');
+const PREFIX = Bun.env.BOT_PREFIX || 'sb?'
+
+export async function loadPrefixCommands(client: BotClient): Promise<void> {
+  const glob = new Glob('**/*.{ts,js}');
+  let loaded = 0;
+  let aliasesLoaded = 0;
+  let skipped = 0;
+  let aliasesSkipped = 0;
+  const files: string[] = [];
+
+  for await (const file of glob.scan({ cwd: COMMANDS_DIR, absolute: true })) {
+    if (file.endsWith('.d.ts')) continue;
+    files.push(file);
+  }
+  files.sort();
+
+  for (const file of files) {
+    try {
+      const mod = await import(file);
+
+      if (!hasShape<PrefixCommand>(mod, PrefixCommandShape)) {
+        logger.warn(`[PrefixCommandHandler] Skipped ${file}, not a valid prefix command`);
+        skipped++;
+        continue;
+      }
+
+      const command: PrefixCommand = {
+        name: mod.name,
+        description: mod.description,
+        execute: mod.execute,
+        aliases: mod.aliases,
+        cooldown: mod.cooldown,
+        isOwnerOnly: mod.isOwnerOnly
+      };
+
+      if (client.prefixCommands.has(command.name)) {
+        logger.warn(`[PrefixCommandHandler] Duplicate command name '${command.name}' in ${file}`);
+        skipped++;
+        continue;
+      }
+
+      if (command.aliases) {
+        for (const alias of command.aliases) {
+          if (client.prefixCommands.has(alias)) {
+            logger.warn(`[PrefixCommandHandler] Duplicate command alias '${alias}' in ${file}`);
+            aliasesSkipped++;
+            continue;
+          }
+
+          client.prefixCommands.set(alias, command);
+          aliasesLoaded++;
+        }
+      }
+
+      client.prefixCommands.set(command.name, command);
+      loaded++;
+    } catch (error) {
+      logger.error(error, `[PrefixCommandHandler] Failed to load file ${file}:`);
+      skipped++;
+    }
+  }
+
+  logger.info(`[PrefixCommandHandler] Loaded ${loaded} prefix command${loaded === 1 ? '' : 's'}${skipped > 0 ? ` (${skipped + aliasesSkipped} skipped)` : ''}${aliasesLoaded > 0 ? ` (${aliasesLoaded} aliases)` : ''}`);
+}
+
+export async function handlePrefixCommand(client: BotClient, message: Message): Promise<void> {
+  if (message.author.bot) return;
+  if (!client.user) return;
+
+  const mentionPrefix = `<@${client.user.id}>`;
+  const mentionPrefixNick = `<@!${client.user.id}>`;
+
+  let usedPrefix: string | null = null;
+
+  if (message.content.startsWith(PREFIX)) usedPrefix = PREFIX;
+  else if (message.content.startsWith(mentionPrefix)) usedPrefix = mentionPrefix;
+  else if (message.content.startsWith(mentionPrefixNick)) usedPrefix = mentionPrefixNick;
+
+  if (!usedPrefix) return;
+
+  const args = message.content.slice(usedPrefix.length).trim().split(/ +/);
+  const commandName = args.shift()?.toLowerCase();
+
+  if (!commandName) return;
+
+  const command = client.prefixCommands.get(commandName);
+  if (!command) {
+    await message.reply({
+      content: 'This command is outdated or disabled.',
+    });
+    return;
+  }
+
+  if (command.isOwnerOnly && !BOT_OWNERS.includes(message.author.id)) {
+    await message.reply({
+      content: 'This is an owner-only command!'
+    });
+    return;
+  }
+
+  const cooldownKey = CooldownManager.key(command.name, message.author.id);
+
+  if (command.cooldown) {
+    const expiresAt = CooldownManager.check(cooldownKey);
+    if (expiresAt !== null) {
+      await message.reply({
+        content: `You can use this command again <t:${expiresAt}:R>.`
+      });
+      return;
+    }
+  }
+
+  const startTime = Date.now();
+
+  try {
+    await command.execute(client, message, ...args);
+    if (command.cooldown) {
+      CooldownManager.start(cooldownKey, command.cooldown);
+    }
+    logger.info(
+      `${PREFIX}${commandName} | ${message.author.username} (${message.author.id}) | ${message.guild?.name ?? 'DM'} | ${Date.now() - startTime}ms`,
+    );
+  } catch (error) {
+    logger.error(error, `[PrefixCommandHandler] Error running ${PREFIX}${commandName}:`);
+    try {
+      await message.reply('Something went wrong running that command.');
+    } catch {
+      // Message may have been deleted or channel gone, nothing to do
+    }
+  }
+}
