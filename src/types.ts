@@ -1,18 +1,19 @@
-import type {
-  AnySelectMenuInteraction,
-  ApplicationCommandType,
-  AutocompleteInteraction,
-  ButtonInteraction,
-  ChatInputCommandInteraction,
-  ClientEvents,
-  ContextMenuCommandBuilder,
-  Message,
-  MessageContextMenuCommandInteraction,
-  ModalSubmitInteraction,
-  SlashCommandBuilder,
-  SlashCommandOptionsOnlyBuilder,
-  SlashCommandSubcommandsOnlyBuilder,
-  UserContextMenuCommandInteraction,
+import {
+  PermissionFlagsBits,
+  type AnySelectMenuInteraction,
+  type ApplicationCommandType,
+  type AutocompleteInteraction,
+  type ButtonInteraction,
+  type ChatInputCommandInteraction,
+  type ClientEvents,
+  type ContextMenuCommandBuilder,
+  type Message,
+  type MessageContextMenuCommandInteraction,
+  type ModalSubmitInteraction,
+  type SlashCommandBuilder,
+  type SlashCommandOptionsOnlyBuilder,
+  type SlashCommandSubcommandsOnlyBuilder,
+  type UserContextMenuCommandInteraction,
 } from 'discord.js';
 import type BotClient from './structures/BotClient';
 
@@ -35,6 +36,15 @@ export type CommandCategory = typeof COMMAND_CATEGORIES[number];
 export function isCommandCategory(value: unknown): value is CommandCategory {
   return typeof value === 'string'
     && (COMMAND_CATEGORIES as readonly string[]).includes(value);
+}
+
+export const PERMISSION_FLAG_NAMES = Object.keys(PermissionFlagsBits) as readonly (keyof typeof PermissionFlagsBits)[];
+
+export type PermissionFlagName = keyof typeof PermissionFlagsBits;
+
+export function isPermissionFlagName(value: unknown): value is PermissionFlagName {
+  return typeof value === 'string'
+    && (PERMISSION_FLAG_NAMES as readonly string[]).includes(value);
 }
 
 export type SlashCommandData =
@@ -76,6 +86,11 @@ export interface PrefixCommandInfo {
   description: string;
   category: CommandCategory;
   aliases?: readonly string[];
+  cooldown?: number;
+  isOwnerOnly?: boolean;
+  allowedChannels?: readonly string[];
+  botPermissions?: readonly PermissionFlagName[];
+  userPermissions?: readonly PermissionFlagName[];
 }
 
 export interface PrefixCommandHelp {
@@ -86,8 +101,6 @@ export interface PrefixCommandHelp {
 export interface PrefixCommand {
   info: PrefixCommandInfo;
   execute: (client: BotClient, message: Message, ...args: readonly string[]) => Promise<void> | void;
-  cooldown?: number;
-  isOwnerOnly?: boolean;
   help?: PrefixCommandHelp;
 }
 
@@ -108,6 +121,27 @@ export function isPrefixCommand(mod: unknown): mod is PrefixCommand {
   if (info.aliases !== undefined) {
     if (!Array.isArray(info.aliases)) return false;
     if (!info.aliases.every(value => typeof value === 'string')) return false;
+  }
+
+  if (info.cooldown !== undefined) {
+    if (typeof info.cooldown !== 'number' || info.cooldown <= 0) return false;
+  }
+
+  if (info.isOwnerOnly !== undefined && typeof info.isOwnerOnly !== 'boolean') return false;
+
+  if (info.allowedChannels !== undefined) {
+    if (!Array.isArray(info.allowedChannels)) return false;
+    if (!info.allowedChannels.every(value => typeof value === 'string')) return false;
+  }
+
+  if (info.botPermissions !== undefined) {
+    if (!Array.isArray(info.botPermissions)) return false;
+    if (!info.botPermissions.every(isPermissionFlagName)) return false;
+  }
+
+  if (info.userPermissions !== undefined) {
+    if (!Array.isArray(info.userPermissions)) return false;
+    if (!info.userPermissions.every(isPermissionFlagName)) return false;
   }
 
   if (m.help !== undefined) {

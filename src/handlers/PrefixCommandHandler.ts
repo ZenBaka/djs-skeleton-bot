@@ -1,7 +1,7 @@
 import { join } from "path";
 import type BotClient from "../structures/BotClient";
 import { Glob } from "bun";
-import { BOT_OWNERS, hasShape, isPrefixCommand, type PrefixCommand, PrefixCommandShape } from "../types";
+import { BOT_OWNERS, isPrefixCommand, type PrefixCommand } from "../types";
 import logger from "../utilities/Logger";
 import { Message } from "discord.js";
 import CooldownManager from "../managers/CooldownManager";
@@ -37,8 +37,6 @@ export async function loadPrefixCommands(client: BotClient): Promise<void> {
         info: mod.info,
         execute: mod.execute,
         help: mod.help,
-        cooldown: mod.cooldown,
-        isOwnerOnly: mod.isOwnerOnly
       };
 
       if (client.prefixCommands.has(command.info.name)) {
@@ -100,22 +98,49 @@ export async function handlePrefixCommand(client: BotClient, message: Message): 
 
   const command = client.prefixCommands.get(commandName);
   if (!command) {
-    await message.reply({
-      content: 'This command is outdated or disabled.',
-    });
+    await message.reply('This command is outdated or disabled.');
     return;
   }
 
-  if (command.isOwnerOnly && !BOT_OWNERS.includes(message.author.id)) {
-    await message.reply({
-      content: 'This is an owner-only command!'
-    });
+  if (command.info.isOwnerOnly && !BOT_OWNERS.includes(message.author.id)) {
+    await message.reply('this is an owner-only command!');
     return;
+  }
+
+  if (command.info.allowedChannels
+    && message.inGuild()
+    && !command.info.allowedChannels.includes(message.channelId)
+  ) {
+    await message.reply('This command is disabled in this channel.');
+    return;
+  }
+
+  if (command.info.botPermissions && message.inGuild()) {
+    const self = await message.guild.members.fetchMe();
+
+    const channelPerms = self.permissionsIn(message.channelId);
+    const missing = channelPerms.missing(command.info.botPermissions);
+
+    if (missing.length > 0) {
+      await message.reply(
+        `I'm missing permissions to run this command: ${missing.join(', ')}`
+      );
+      return;
+    }
+  }
+
+  if (command.info.userPermissions && message.member && message.inGuild()) {
+    const missing = message.channel.permissionsFor(message.member)?.missing(command.info.userPermissions) ?? [];
+
+    if (missing.length > 0) {
+      await message.reply(`You need: ${missing.join(', ')}`);
+      return;
+    }
   }
 
   const cooldownKey = CooldownManager.key(command.info.name, message.author.id);
 
-  if (command.cooldown) {
+  if (command.info.cooldown) {
     const expiresAt = CooldownManager.check(cooldownKey);
     if (expiresAt !== null) {
       await message.reply({
@@ -129,8 +154,8 @@ export async function handlePrefixCommand(client: BotClient, message: Message): 
 
   try {
     await command.execute(client, message, ...args);
-    if (command.cooldown) {
-      CooldownManager.start(cooldownKey, command.cooldown);
+    if (command.info.cooldown) {
+      CooldownManager.start(cooldownKey, command.info.cooldown);
     }
     logger.info(
       `${PREFIX}${commandName} | ${message.author.username} (${message.author.id}) | ${message.guild?.name ?? 'DM'} | ${Date.now() - startTime}ms`,

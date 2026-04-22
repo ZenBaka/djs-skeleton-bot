@@ -4,16 +4,15 @@ export const info: PrefixCommandInfo = {
   name: 'echo',
   description: 'Echo a message back as the bot.',
   category: 'Owner',
-  aliases: ['msg', 'e']
+  aliases: ['msg', 'e'],
+  cooldown: 3,
+  isOwnerOnly: true
 }
 
 export const help: PrefixCommandHelp = {
   args: ['...string'],
   usage: 'echo This is a test message'
 }
-
-export const cooldown = 3;
-export const isOwnerOnly = true; // prevent mass-mention abuse by default
 
 export const execute: PrefixCommand['execute'] = async (_client, message, ...args) => {
   if (args.length === 0) {

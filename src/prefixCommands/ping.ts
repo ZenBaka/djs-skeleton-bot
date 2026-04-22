@@ -1,13 +1,12 @@
-import type { PrefixCommand, PrefixCommandHelp, PrefixCommandInfo } from "../types";
+import type { PrefixCommand, PrefixCommandInfo } from "../types";
 
 export const info: PrefixCommandInfo = {
   name: 'ping',
   description: 'Get latency about the bot.',
   category: 'Information',
-  aliases: ['p', 'latency', 'gateway']
+  aliases: ['p', 'latency', 'gateway'],
+  cooldown: 3,
 };
-
-export const cooldown = 3;
 
 export const execute: PrefixCommand['execute'] = async (client, message, ..._args) => {
   const sent = await message.reply('Pinging...');

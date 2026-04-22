@@ -11,7 +11,8 @@ export const info: PrefixCommandInfo = {
   name: 'demo',
   description: 'A demo command showcasing the various components of Discord.',
   category: 'Other',
-  aliases: ['d', 'test', 'example']
+  aliases: ['d', 'test', 'example'],
+  cooldown: 3,
 };
 
 // Delete button (author-only via the handler)

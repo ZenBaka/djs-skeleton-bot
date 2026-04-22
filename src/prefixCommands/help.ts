@@ -6,7 +6,9 @@ export const info: PrefixCommandInfo = {
   name: 'help',
   description: 'A useful help command to get various information about other commands',
   category: 'Information',
-  aliases: ['h', 'cmds', 'commands']
+  aliases: ['h', 'cmds', 'commands'],
+  cooldown: 3,
+  botPermissions: ['EmbedLinks']
 };
 
 export const help: PrefixCommandHelp = {
@@ -46,7 +48,7 @@ export const execute: PrefixCommand['execute'] = async (client, message, ...args
       .appendLine(`Usage: \`${usage}\``)
       .appendLineIf(a.length > 0, `Args: \`${a}\``)
       .appendLineIf(aliases.length > 0, `Aliases: \`${aliases}\``)
-      .appendLineIf(command.cooldown, `Cooldown: ${command.cooldown}s`)
+      .appendLineIf(command.info.cooldown, `Cooldown: ${command.info.cooldown}s`)
       .trimEnd();
 
     const embed = new EmbedBuilder()
