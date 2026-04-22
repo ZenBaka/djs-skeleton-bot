@@ -7,4 +7,7 @@ export const once = true;
 
 export const execute: Event<Events.ClientReady>['execute'] = async(client, readyClient) => {
   logger.info(`[Bot ${client && client.shard ? client.shard.ids[0] : 0}] Logged in as ${readyClient.user.tag}`);
+  if (client.user) {
+    client.user.setPresence({ status: 'online', activities: [] });
+  }
 };
