@@ -5,8 +5,10 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "bun run src/bot.ts",
-    "start:shard": "bun .",
+    "start": "cross-env NODE_ENV=production bun run src/bot.ts",
+    "start:shard": "cross-env NODE_ENV=production bun .",
+    "start:dev": "cross-env NODE_ENV=development bun run src/bot.ts",
+    "start:dev:shard": "cross-env NODE_ENV=development bun .",
     "typeCheck": "tsc --noEmit",
     "register": "bun run scripts/register-commands.ts",
     "register:guild": "bun run scripts/register-commands.ts --guild",
@@ -15,7 +17,8 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^25.6.0"
+    "@types/node": "^25.6.0",
+    "cross-env": "^10.1.0"
   },
   "peerDependencies": {
     "typescript": "^6.0.3"
