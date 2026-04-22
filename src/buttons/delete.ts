@@ -1,7 +1,9 @@
-import type { Button } from '../types';
+import type { Button, ComponentInfo } from '../types';
 
-export const customId = 'delete';
-export const isAuthorOnly = true;
+export const info: ComponentInfo = {
+  customId: 'delete',
+  isAuthorOnly: true,
+};
 
 export const execute: Button['execute'] = async (_client, interaction) => {
   // isAuthorOnly above makes the handler reject anyone who wasn't the

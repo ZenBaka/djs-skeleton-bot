@@ -1,8 +1,10 @@
 import { MessageFlags } from 'discord.js';
-import type { ModalSubmit } from '../types';
+import type { ComponentInfo, ModalSubmit } from '../types';
 import logger from '../utilities/Logger';
 
-export const customId = 'feedback';
+export const info: ComponentInfo = {
+  customId: 'feedback'
+};
 
 export const execute: ModalSubmit['execute'] = async (_client, interaction) => {
   const subject = interaction.fields.getTextInputValue('subject');

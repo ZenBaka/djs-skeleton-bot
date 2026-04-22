@@ -1,7 +1,9 @@
 import { MessageFlags } from 'discord.js';
-import type { SelectMenu } from '../types';
+import type { ComponentInfo, SelectMenu } from '../types';
 
-export const customId = 'pickUser';
+export const info: ComponentInfo = {
+  customId: 'pickUser'
+};
 
 export const execute: SelectMenu['execute'] = async (_client, interaction) => {
   // User selects give you interaction.users as a resolved Collection of

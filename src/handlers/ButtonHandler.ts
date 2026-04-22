@@ -27,19 +27,17 @@ export async function loadButtons(client: BotClient): Promise<void> {
       }
 
       const button: Button = {
-        customId: mod.customId,
+        info: mod.info,
         execute: mod.execute,
-        cooldown: mod.cooldown,
-        isAuthorOnly: mod.isAuthorOnly
       };
 
-      if (client.buttons.has(button.customId)) {
-        logger.warn(`[ButtonHandler] Duplicate button id '${button.customId}' in ${file}`);
+      if (client.buttons.has(button.info.customId)) {
+        logger.warn(`[ButtonHandler] Duplicate button id '${button.info.customId}' in ${file}`);
         skipped++;
         continue;
       }
 
-      client.buttons.set(button.customId, button);
+      client.buttons.set(button.info.customId, button);
       loaded++;
     } catch (error) {
       logger.error(error, `[ButtonHandler] Failed to load file ${file}`);
@@ -73,7 +71,7 @@ export async function handleButton(client: BotClient, interaction: ButtonInterac
     return;
   }
 
-  if (button.isAuthorOnly && interaction.user.id !== interaction.message.interactionMetadata?.user.id) {
+  if (button.info.isAuthorOnly && interaction.user.id !== interaction.message.interactionMetadata?.user.id) {
     await interaction.reply({
       content: 'Only the interaction owner can use this button.',
       flags: MessageFlags.Ephemeral
@@ -81,9 +79,9 @@ export async function handleButton(client: BotClient, interaction: ButtonInterac
     return;
   }
 
-  const cooldownKey = CooldownManager.key(button.customId, interaction.user.id);
+  const cooldownKey = CooldownManager.key(button.info.customId, interaction.user.id);
 
-  if (button.cooldown) {
+  if (button.info.cooldown) {
     const expiresAt = CooldownManager.check(cooldownKey);
     if (expiresAt !== null) {
       await interaction.reply({
@@ -98,8 +96,8 @@ export async function handleButton(client: BotClient, interaction: ButtonInterac
 
   try {
     await button.execute(client, interaction, ...args);
-    if (button.cooldown) {
-      CooldownManager.start(cooldownKey, button.cooldown);
+    if (button.info.cooldown) {
+      CooldownManager.start(cooldownKey, button.info.cooldown);
     }
 
     logger.info(

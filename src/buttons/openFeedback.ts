@@ -1,7 +1,10 @@
 import { LabelBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
-import type { Button } from '../types';
+import type { Button, ComponentInfo } from '../types';
 
-export const customId = 'openFeedback';
+export const info: ComponentInfo = {
+  customId: 'openFeedback',
+  cooldown: 3
+};
 
 export const execute: Button['execute'] = async (_client, interaction) => {
   const subjectInput = new TextInputBuilder()

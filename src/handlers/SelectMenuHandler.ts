@@ -32,19 +32,17 @@ export async function loadMenus(client: BotClient): Promise<void> {
       }
 
       const menu: SelectMenu = {
-        customId: mod.customId,
+        info: mod.info,
         execute: mod.execute,
-        cooldown: mod.cooldown,
-        isAuthorOnly: mod.isAuthorOnly
       };
 
-      if (client.menus.has(menu.customId)) {
-        logger.warn(`[SelectMenuHandler] Duplicate menu id '${menu.customId}' in ${file}`);
+      if (client.menus.has(menu.info.customId)) {
+        logger.warn(`[SelectMenuHandler] Duplicate menu id '${menu.info.customId}' in ${file}`);
         skipped++;
         continue;
       }
 
-      client.menus.set(menu.customId, menu);
+      client.menus.set(menu.info.customId, menu);
       loaded++;
     } catch (error) {
       logger.error(error, `[SelectMenuHandler] Failed to load file ${file}:`);
@@ -70,7 +68,7 @@ export async function handleMenu(client: BotClient, interaction: AnySelectMenuIn
     return;
   }
 
-  if (menu.isAuthorOnly && interaction.user.id !== interaction.message.interactionMetadata?.user.id) {
+  if (menu.info.isAuthorOnly && interaction.user.id !== interaction.message.interactionMetadata?.user.id) {
     await interaction.reply({
       content: 'Only the interaction owner can use this menu.',
       flags: MessageFlags.Ephemeral
@@ -86,9 +84,9 @@ export async function handleMenu(client: BotClient, interaction: AnySelectMenuIn
     return;
   }
 
-  const cooldownKey = CooldownManager.key(menu.customId, interaction.user.id);
+  const cooldownKey = CooldownManager.key(menu.info.customId, interaction.user.id);
 
-  if (menu.cooldown) {
+  if (menu.info.cooldown) {
     const expiresAt = CooldownManager.check(cooldownKey);
     if (expiresAt !== null) {
       await interaction.reply({
@@ -103,8 +101,8 @@ export async function handleMenu(client: BotClient, interaction: AnySelectMenuIn
 
   try {
     await menu.execute(client, interaction, ...args);
-    if (menu.cooldown) {
-      CooldownManager.start(cooldownKey, menu.cooldown);
+    if (menu.info.cooldown) {
+      CooldownManager.start(cooldownKey, menu.info.cooldown);
     }
 
     logger.info(

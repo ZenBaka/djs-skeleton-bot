@@ -27,18 +27,17 @@ export async function loadModals(client: BotClient): Promise<void> {
       }
 
       const modal: ModalSubmit = {
-        customId: mod.customId,
+        info: mod.info,
         execute: mod.execute,
-        cooldown: mod.cooldown
       };
 
-      if (client.modals.has(modal.customId)) {
-        logger.warn(`[ModalSubmitHandler] Duplicated modal id '${modal.customId}' in ${file}`);
+      if (client.modals.has(modal.info.customId)) {
+        logger.warn(`[ModalSubmitHandler] Duplicated modal id '${modal.info.customId}' in ${file}`);
         skipped++;
         continue;
       }
 
-      client.modals.set(modal.customId, modal);
+      client.modals.set(modal.info.customId, modal);
       loaded++;
     } catch (error) {
       logger.error(error, `[ModalSubmitHandler] Failed to load file ${file}`);
@@ -72,9 +71,9 @@ export async function handleModalSubmit(client: BotClient, interaction: ModalSub
     return;
   }
 
-  const cooldownKey = CooldownManager.key(modal.customId, interaction.user.id);
+  const cooldownKey = CooldownManager.key(modal.info.customId, interaction.user.id);
 
-  if (modal.cooldown) {
+  if (modal.info.cooldown) {
     const expiresAt = CooldownManager.check(cooldownKey);
     if (expiresAt !== null) {
       await interaction.reply({
@@ -89,8 +88,8 @@ export async function handleModalSubmit(client: BotClient, interaction: ModalSub
 
   try {
     await modal.execute(client, interaction, ...args);
-    if (modal.cooldown) {
-      CooldownManager.start(cooldownKey, modal.cooldown);
+    if (modal.info.cooldown) {
+      CooldownManager.start(cooldownKey, modal.info.cooldown);
     }
 
     logger.info(

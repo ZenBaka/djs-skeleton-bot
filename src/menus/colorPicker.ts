@@ -1,7 +1,9 @@
 import { MessageFlags } from 'discord.js';
-import type { SelectMenu } from '../types';
+import type { ComponentInfo, SelectMenu } from '../types';
 
-export const customId = 'colorPicker';
+export const info: ComponentInfo = {
+  customId: 'colorPicker'
+};
 
 export const execute: SelectMenu['execute'] = async (_client, interaction) => {
   // AnySelectMenuInteraction is the union of every select type. Narrow

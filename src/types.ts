@@ -60,7 +60,7 @@ export interface SlashCommand {
   autocomplete?: (client: BotClient, interaction: AutocompleteInteraction) => Promise<void> | void;
 }
 
-export const SlashCommandShape = ['data', 'execute'] as const satisfies readonly (keyof SlashCommand)[];
+export const SlashCommandShape = ['data', 'category', 'execute'] as const satisfies readonly (keyof SlashCommand)[];
 
 export function isSlashCommand(mod: unknown): mod is SlashCommand {
   if (!hasShape<SlashCommand>(mod, SlashCommandShape)) return false;
@@ -71,6 +71,7 @@ export function isSlashCommand(mod: unknown): mod is SlashCommand {
   if (typeof m.data !== 'object' || m.data === null) return false;
   const data = m.data as Record<string, unknown>;
   if (typeof data.name !== 'string' || data.name.length === 0) return false;
+  if (typeof data.description !== 'string' || data.description.length === 0) return false;
   if (typeof data.toJSON !== 'function') return false;
 
   if (!isCommandCategory(m.category)) return false;
@@ -159,14 +160,18 @@ export function isPrefixCommand(mod: unknown): mod is PrefixCommand {
   return true;
 }
 
-export interface Button {
+export interface ComponentInfo {
   customId: string;
-  execute: (client: BotClient, interaction: ButtonInteraction, ...args: readonly string[]) => Promise<void> | void;
   cooldown?: number;
   isAuthorOnly?: boolean;
 }
 
-export const ButtonShape = ['customId', 'execute'] as const satisfies readonly (keyof Button)[];
+export interface Button {
+  info: ComponentInfo;
+  execute: (client: BotClient, interaction: ButtonInteraction, ...args: readonly string[]) => Promise<void> | void;
+}
+
+export const ButtonShape = ['info', 'execute'] as const satisfies readonly (keyof Button)[];
 
 export function isButton(mod: unknown): mod is Button {
   if (!hasShape<Button>(mod, ButtonShape)) return false;
@@ -174,22 +179,23 @@ export function isButton(mod: unknown): mod is Button {
 
   if (typeof m.execute !== 'function') return false;
 
-  if (typeof m.customId !== 'string' || m.customId.length === 0) return false;
-
-  if (m.cooldown !== undefined && typeof m.cooldown !== 'number') return false;
-  if (m.isAuthorOnly !== undefined && typeof m.isAuthorOnly !== 'boolean') return false;
+  if (typeof m.info !== 'object' || m.info === null) return false;
+  const info = m.info as Record<string, unknown>;
+  if (typeof info.customId !== 'string' || info.customId.length === 0) return false;
+  if (info.cooldown !== undefined) {
+    if (typeof info.cooldown !== 'number' || info.cooldown <= 0) return false;
+  }
+  if (info.isAuthorOnly !== undefined && typeof info.isAuthorOnly !== 'boolean') return false;
 
   return true;
 }
 
 export interface SelectMenu {
-  customId: string;
+  info: ComponentInfo;
   execute: (client: BotClient, interaction: AnySelectMenuInteraction, ...args: readonly string[]) => Promise<void> | void;
-  cooldown?: number;
-  isAuthorOnly?: boolean;
 }
 
-export const MenuShape = ['customId', 'execute'] as const satisfies readonly (keyof SelectMenu)[];
+export const MenuShape = ['info', 'execute'] as const satisfies readonly (keyof SelectMenu)[];
 
 export function isSelectMenu(mod: unknown): mod is SelectMenu {
   if (!hasShape<SelectMenu>(mod, MenuShape)) return false;
@@ -197,21 +203,23 @@ export function isSelectMenu(mod: unknown): mod is SelectMenu {
 
   if (typeof m.execute !== 'function') return false;
 
-  if (typeof m.customId !== 'string' || m.customId.length === 0) return false;
-
-  if (m.cooldown !== undefined && typeof m.cooldown !== 'number') return false;
-  if (m.isAuthorOnly !== undefined && typeof m.isAuthorOnly !== 'boolean') return false;
+  if (typeof m.info !== 'object' || m.info === null) return false;
+  const info = m.info as Record<string, unknown>;
+  if (typeof info.customId !== 'string' || info.customId.length === 0) return false;
+  if (info.cooldown !== undefined) {
+    if (typeof info.cooldown !== 'number' || info.cooldown <= 0) return false;
+  }
+  if (info.isAuthorOnly !== undefined && typeof info.isAuthorOnly !== 'boolean') return false;
 
   return true;
 }
 
 export interface ModalSubmit {
-  customId: string;
+  info: ComponentInfo;
   execute: (client: BotClient, interaction: ModalSubmitInteraction, ...args: readonly string[]) => Promise<void> | void;
-  cooldown?: number;
 }
 
-export const ModalSubmitShape = ['customId', 'execute'] as const satisfies readonly (keyof ModalSubmit)[];
+export const ModalSubmitShape = ['info', 'execute'] as const satisfies readonly (keyof ModalSubmit)[];
 
 export function isModalSubmit(mod: unknown): mod is ModalSubmit {
   if (!hasShape<ModalSubmit>(mod, ModalSubmitShape)) return false;
@@ -219,9 +227,14 @@ export function isModalSubmit(mod: unknown): mod is ModalSubmit {
 
   if (typeof m.execute !== 'function') return false;
 
-  if (typeof m.customId !== 'string' || m.customId.length === 0) return false;
+  if (typeof m.info !== 'object' || m.info === null) return false;
+  const info = m.info as Record<string, unknown>;
 
-  if (m.cooldown !== undefined && typeof m.cooldown !== 'number') return false;
+  if (typeof info.customId !== 'string' || info.customId.length === 0) return false;
+  if (info.cooldown !== undefined) {
+    if (typeof info.cooldown !== 'number' || info.cooldown <= 0) return false;
+  }
+  if (info.isAuthorOnly !== undefined && typeof info.isAuthorOnly !== 'boolean') return false;
 
   return true;
 }

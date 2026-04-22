@@ -1,7 +1,10 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import type { Button } from '../types';
+import type { Button, ComponentInfo } from '../types';
 
-export const customId = 'counter';
+export const info: ComponentInfo = {
+  customId: 'counter',
+  cooldown: 1,
+};
 
 export const execute: Button['execute'] = async (_client, interaction, countStr) => {
   // The handler splits the incoming customId on ':'. 'counter' matched the
