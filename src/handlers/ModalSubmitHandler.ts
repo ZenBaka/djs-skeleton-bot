@@ -5,6 +5,7 @@ import { hasShape, isModalSubmit, type ModalSubmit, ModalSubmitShape } from "../
 import logger from "../utilities/Logger";
 import { MessageFlags, type ModalSubmitInteraction } from "discord.js";
 import CooldownManager from "../managers/CooldownManager";
+import BlacklistManager from "../managers/BlacklistManager";
 
 const MODALS_DIR = join(import.meta.dir, '..', 'modals');
 
@@ -58,6 +59,14 @@ export async function handleModalSubmit(client: BotClient, interaction: ModalSub
   if (!modal) {
     await interaction.reply({
       content: 'This modal is outdated or disabled.',
+      flags: MessageFlags.Ephemeral
+    });
+    return;
+  }
+
+  if (BlacklistManager.has(interaction.user.id)) {
+    await interaction.reply({
+      content: 'You are blacklisted from using any of this bot\'s features.',
       flags: MessageFlags.Ephemeral
     });
     return;

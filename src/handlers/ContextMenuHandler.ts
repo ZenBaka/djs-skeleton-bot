@@ -6,6 +6,7 @@ import type BotClient from "../structures/BotClient";
 import { BOT_OWNERS, ContextMenuCommandShape, hasShape, isContextMenuCommand, type ContextMenuCommand } from "../types";
 import logger from "../utilities/Logger";
 import CooldownManager from "../managers/CooldownManager";
+import BlacklistManager from "../managers/BlacklistManager";
 
 const CONTEXT_MENUS_DIR = join(import.meta.dir, '..', 'contextMenus');
 
@@ -85,6 +86,14 @@ export async function handleContextMenu(client: BotClient, interaction: ContextM
     await interaction.reply({
       content: 'This command is outdated or disabled.',
       flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  if (BlacklistManager.has(interaction.user.id)) {
+    await interaction.reply({
+      content: 'You are blacklisted from using any of this bot\'s features.',
+      flags: MessageFlags.Ephemeral
     });
     return;
   }

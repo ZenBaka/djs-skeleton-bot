@@ -6,6 +6,7 @@ import type BotClient from "../structures/BotClient";
 import { hasShape, isSlashCommand, SlashCommandShape, type SlashCommand } from "../types";
 import logger from "../utilities/Logger";
 import CooldownManager from "../managers/CooldownManager";
+import BlacklistManager from "../managers/BlacklistManager";
 
 const COMMANDS_DIR = join(import.meta.dir, '..', 'slashCommands');
 
@@ -61,6 +62,14 @@ export async function handleCommand(client: BotClient, interaction: ChatInputCom
   if (!command) {
     await interaction.reply({
       content: 'This command is outdated or disabled.',
+      flags: MessageFlags.Ephemeral
+    });
+    return;
+  }
+
+  if (BlacklistManager.has(interaction.user.id)) {
+    await interaction.reply({
+      content: 'You are blacklisted from using any of this bot\'s features.',
       flags: MessageFlags.Ephemeral
     });
     return;

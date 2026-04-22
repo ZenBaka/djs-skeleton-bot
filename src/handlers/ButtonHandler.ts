@@ -5,6 +5,7 @@ import { type Button, ButtonShape, hasShape, isButton } from "../types";
 import logger from "../utilities/Logger";
 import { MessageFlags, type ButtonInteraction } from "discord.js";
 import CooldownManager from "../managers/CooldownManager";
+import BlacklistManager from "../managers/BlacklistManager";
 
 const BUTTONS_DIR = join(import.meta.dir, '..', 'buttons');
 
@@ -59,6 +60,14 @@ export async function handleButton(client: BotClient, interaction: ButtonInterac
   if (!button) {
     await interaction.reply({
       content: 'This button is outdated or disabled.',
+      flags: MessageFlags.Ephemeral
+    });
+    return;
+  }
+
+  if (BlacklistManager.has(interaction.user.id)) {
+    await interaction.reply({
+      content: 'You are blacklisted from using any of this bot\'s features.',
       flags: MessageFlags.Ephemeral
     });
     return;

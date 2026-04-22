@@ -5,6 +5,7 @@ import { BOT_OWNERS, isPrefixCommand, type PrefixCommand } from "../types";
 import logger from "../utilities/Logger";
 import { Message } from "discord.js";
 import CooldownManager from "../managers/CooldownManager";
+import BlacklistManager from "../managers/BlacklistManager";
 
 const COMMANDS_DIR = join(import.meta.dir, '..', 'prefixCommands');
 const PREFIX = Bun.env.BOT_PREFIX || 'sb?'
@@ -101,6 +102,8 @@ export async function handlePrefixCommand(client: BotClient, message: Message): 
     await message.reply('This command is outdated or disabled.');
     return;
   }
+
+  if (BlacklistManager.has(message.author.id)) return;
 
   if (command.info.isOwnerOnly && !BOT_OWNERS.includes(message.author.id)) {
     await message.reply('this is an owner-only command!');

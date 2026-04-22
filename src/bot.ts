@@ -5,6 +5,7 @@ import { loadModals } from "./handlers/ModalSubmitHandler";
 import { loadPrefixCommands } from "./handlers/PrefixCommandHandler";
 import { loadMenus } from "./handlers/SelectMenuHandler";
 import { loadCommands } from "./handlers/SlashCommandHandler";
+import BlacklistManager from "./managers/BlacklistManager";
 import BotClient from "./structures/BotClient";
 import logger, { flushAndClose } from "./utilities/Logger";
 
@@ -24,6 +25,8 @@ const client = new BotClient();
 
     // Register client events
     await loadEvents(client);
+
+    BlacklistManager.load();
 
     // Login
     await client.login(Bun.env.BOT_TOKEN);

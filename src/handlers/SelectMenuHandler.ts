@@ -5,6 +5,7 @@ import { hasShape, isSelectMenu, MenuShape, type SelectMenu } from "../types";
 import logger from "../utilities/Logger";
 import { MessageFlags, type AnySelectMenuInteraction } from "discord.js";
 import CooldownManager from "../managers/CooldownManager";
+import BlacklistManager from "../managers/BlacklistManager";
 
 const MENUS_DIR = join(import.meta.dir, '..', 'menus');
 
@@ -72,6 +73,14 @@ export async function handleMenu(client: BotClient, interaction: AnySelectMenuIn
   if (menu.isAuthorOnly && interaction.user.id !== interaction.message.interactionMetadata?.user.id) {
     await interaction.reply({
       content: 'Only the interaction owner can use this menu.',
+      flags: MessageFlags.Ephemeral
+    });
+    return;
+  }
+
+  if (BlacklistManager.has(interaction.user.id)) {
+    await interaction.reply({
+      content: 'You are blacklisted from using any of this bot\'s features.',
       flags: MessageFlags.Ephemeral
     });
     return;
