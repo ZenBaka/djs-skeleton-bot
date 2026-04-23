@@ -1,11 +1,12 @@
 import { join } from "path";
 import type BotClient from "../structures/BotClient";
 import { Glob } from "bun";
-import { BOT_OWNERS, isPrefixCommand, type PrefixCommand } from "../types";
+import { BOT_OWNERS, type PrefixCommand } from "../types";
 import logger from "../utilities/Logger";
 import { Message } from "discord.js";
 import CooldownManager from "../managers/CooldownManager";
 import BlacklistManager from "../managers/BlacklistManager";
+import { isPrefixCommand } from "../utilities/Validators";
 
 const COMMANDS_DIR = join(import.meta.dir, '..', 'prefixCommands');
 const PREFIX = Bun.env.BOT_PREFIX || 'sb?'

@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import type { Button, ComponentInfo } from '../types';
 
-export const info: ComponentInfo = {
+export const info: ComponentInfo<Button> = {
   customId: 'counter',
   cooldown: 1,
 };

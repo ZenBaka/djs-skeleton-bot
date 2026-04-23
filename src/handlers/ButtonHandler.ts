@@ -1,11 +1,12 @@
 import { join } from "path";
 import type BotClient from "../structures/BotClient";
 import { Glob } from "bun";
-import { type Button, ButtonShape, hasShape, isButton } from "../types";
+import { type Button } from "../types";
 import logger from "../utilities/Logger";
 import { MessageFlags, type ButtonInteraction } from "discord.js";
 import CooldownManager from "../managers/CooldownManager";
 import BlacklistManager from "../managers/BlacklistManager";
+import { isButton } from "../utilities/Validators";
 
 const BUTTONS_DIR = join(import.meta.dir, '..', 'buttons');
 
@@ -71,12 +72,18 @@ export async function handleButton(client: BotClient, interaction: ButtonInterac
     return;
   }
 
-  if (button.info.isAuthorOnly && interaction.user.id !== interaction.message.interactionMetadata?.user.id) {
-    await interaction.reply({
-      content: 'Only the interaction owner can use this button.',
-      flags: MessageFlags.Ephemeral
-    });
-    return;
+  if (button.info.isAuthorOnly) {
+    const ownerId =
+      (await button.info.resolveOwner?.(interaction)) ??
+      interaction.message.interactionMetadata?.user.id;
+
+    if (!ownerId || interaction.user.id !== ownerId) {
+      await interaction.reply({
+        content: 'This button is not for you!',
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
   }
 
   const cooldownKey = CooldownManager.key(button.info.customId, interaction.user.id);

@@ -1,11 +1,12 @@
 import { join } from "path";
 import type BotClient from "../structures/BotClient";
 import { Glob } from "bun";
-import { hasShape, isSelectMenu, MenuShape, type SelectMenu } from "../types";
+import { type SelectMenu } from "../types";
 import logger from "../utilities/Logger";
 import { MessageFlags, type AnySelectMenuInteraction } from "discord.js";
 import CooldownManager from "../managers/CooldownManager";
 import BlacklistManager from "../managers/BlacklistManager";
+import { isSelectMenu } from "../utilities/Validators";
 
 const MENUS_DIR = join(import.meta.dir, '..', 'menus');
 

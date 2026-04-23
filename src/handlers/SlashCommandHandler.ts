@@ -3,10 +3,11 @@ import type { AutocompleteInteraction, ChatInputCommandInteraction } from "disco
 import { Glob } from "bun";
 import { join } from "path";
 import type BotClient from "../structures/BotClient";
-import { hasShape, isSlashCommand, SlashCommandShape, type SlashCommand } from "../types";
+import {  type SlashCommand } from "../types";
 import logger from "../utilities/Logger";
 import CooldownManager from "../managers/CooldownManager";
 import BlacklistManager from "../managers/BlacklistManager";
+import { isSlashCommand } from "../utilities/Validators";
 
 const COMMANDS_DIR = join(import.meta.dir, '..', 'slashCommands');
 

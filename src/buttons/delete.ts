@@ -1,8 +1,10 @@
 import type { Button, ComponentInfo } from '../types';
+import { resolveUserId } from '../utilities/Validators';
 
-export const info: ComponentInfo = {
+export const info: ComponentInfo<Button> = {
   customId: 'delete',
   isAuthorOnly: true,
+  resolveOwner: resolveUserId
 };
 
 export const execute: Button['execute'] = async (_client, interaction) => {

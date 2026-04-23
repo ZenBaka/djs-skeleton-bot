@@ -1,7 +1,7 @@
 import { MessageFlags } from 'discord.js';
 import type { ComponentInfo, SelectMenu } from '../types';
 
-export const info: ComponentInfo = {
+export const info: ComponentInfo<SelectMenu> = {
   customId: 'colorPicker'
 };
 

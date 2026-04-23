@@ -6,6 +6,7 @@ import {
   UserSelectMenuBuilder,
 } from 'discord.js';
 import type { PrefixCommand, PrefixCommandInfo } from '../types';
+import { authorButton } from '../utilities/Builders';
 
 export const info: PrefixCommandInfo = {
   name: 'demo',
@@ -14,14 +15,6 @@ export const info: PrefixCommandInfo = {
   aliases: ['d', 'test', 'example'],
   cooldown: 3,
 };
-
-// Delete button (author-only via the handler)
-const deleteRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-  new ButtonBuilder()
-    .setCustomId('delete')
-    .setLabel('Delete')
-    .setStyle(ButtonStyle.Danger),
-);
 
 // Counter button starting at 0
 const counterRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -59,6 +52,11 @@ const userRow = new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(
 );
 
 export const execute: PrefixCommand['execute'] = async (_client, message, ..._args) => {
+  // Delete button (author-only via the handler)
+  const deleteRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    authorButton(message.author.id, 'delete', { label: 'Delete', style: ButtonStyle.Danger })
+  );
+
   await message.reply({
     content: 'Demo components:',
     components: [deleteRow, counterRow, feedbackRow, colorRow, userRow]

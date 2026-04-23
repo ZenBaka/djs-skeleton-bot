@@ -7,6 +7,7 @@ import {
   UserSelectMenuBuilder,
 } from 'discord.js';
 import type { CommandCategory, SlashCommand } from '../types';
+import { authorButton } from '../utilities/Builders';
 
 export const data = new SlashCommandBuilder()
   .setName('demo')
@@ -15,14 +16,6 @@ export const data = new SlashCommandBuilder()
 export const cooldown = 3;
 
 export const category: CommandCategory = 'Other';
-
-// Delete button (author-only via the handler)
-const deleteRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-  new ButtonBuilder()
-    .setCustomId('delete')
-    .setLabel('Delete')
-    .setStyle(ButtonStyle.Danger),
-);
 
 // Counter button starting at 0
 const counterRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -60,6 +53,12 @@ const userRow = new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(
 );
 
 export const execute: SlashCommand['execute'] = async (_client, interaction) => {
+  // Delete button (author-only via the handler)
+  const deleteRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    // Builder function that builds a new button with the customId: customId:userId
+    authorButton(interaction.user.id, 'delete', { style: ButtonStyle.Danger, label: 'Delete' })
+  );
+
   await interaction.reply({
     content: 'Demo components:',
     components: [deleteRow, counterRow, feedbackRow, colorRow, userRow]

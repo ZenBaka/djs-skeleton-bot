@@ -1,11 +1,12 @@
 import { join } from "path";
 import type BotClient from "../structures/BotClient";
 import { Glob } from "bun";
-import { hasShape, isModalSubmit, type ModalSubmit, ModalSubmitShape } from "../types";
+import { type ModalSubmit } from "../types";
 import logger from "../utilities/Logger";
 import { MessageFlags, type ModalSubmitInteraction } from "discord.js";
 import CooldownManager from "../managers/CooldownManager";
 import BlacklistManager from "../managers/BlacklistManager";
+import { isModalSubmit } from "../utilities/Validators";
 
 const MODALS_DIR = join(import.meta.dir, '..', 'modals');
 

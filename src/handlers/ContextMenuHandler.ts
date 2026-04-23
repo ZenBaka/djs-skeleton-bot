@@ -3,10 +3,11 @@ import { Glob } from "bun";
 import { MessageFlags } from "discord.js";
 import type { ContextMenuCommandInteraction } from "discord.js";
 import type BotClient from "../structures/BotClient";
-import { BOT_OWNERS, isContextMenuCommand, type ContextMenuCommand } from "../types";
+import { BOT_OWNERS, type ContextMenuCommand } from "../types";
 import logger from "../utilities/Logger";
 import CooldownManager from "../managers/CooldownManager";
 import BlacklistManager from "../managers/BlacklistManager";
+import { isContextMenuCommand } from "../utilities/Validators";
 
 const CONTEXT_MENUS_DIR = join(import.meta.dir, '..', 'contextMenus');
 
